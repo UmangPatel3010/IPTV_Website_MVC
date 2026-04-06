@@ -1,0 +1,123 @@
+@model IPTV_Website.Models.SettingsViewModel
+
+@{
+    ViewData["Title"] = "Settings";
+    ViewData["ActivePage"] = "settings";
+}
+
+<div class="tv-page section-shell settings-screen">
+    <section class="section-top compact-top">
+        <div class="section-title-block">
+            <div class="section-icon settings" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19.14 12.94a1.5 1.5 0 000-1.88l2.03-1.58a0.5 0.5 0 00.12-0.65l-1.92-3.32a0.5 0.5 0 00-0.6-0.22l-2.39 0.96a6.48 6.48 0 00-1.62-0.94L14.5 2.5a0.5 0.5 0 00-0.5-0.5h-4a0.5 0.5 0 00-0.5 0.5l-0.2 2.69c-0.57 0.23-1.11 0.52-1.62 0.94L4.67 6.17a0.5 0.5 0 00-0.6 0.22L2.15 9.71a0.5 0.5 0 00.12 0.65l2.03 1.58a1.5 1.5 0 000 1.88L2.27 15.4a0.5 0.5 0 00-0.12 0.65l1.92 3.32c0.15 0.26 0.46 0.36 0.73 0.26l2.39-0.96c0.5 0.42 1.05 0.71 1.62 0.94L10 21.5a0.5 0.5 0 00.5 0.5h4a0.5 0.5 0 00.5-0.5l0.2-2.69c0.57-0.23 1.11-0.52 1.62-0.94l2.39 0.96c0.27 0.11 0.58 0.01 0.73-0.26l1.92-3.32a0.5 0.5 0 00-0.12-0.65l-2.03-1.58z" fill="currentColor" />
+                    <circle cx="12" cy="12" r="3" fill="currentColor" />
+                </svg>
+            </div>
+            <div class="settings-title">
+                <h1>Settings</h1>
+                <p>Manage your preferences</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="settings-stack tv-focus-scope" id="settingsPrimarySection" data-focus-scope data-scope-id="settings-grid" data-nav-type="grid" data-nav-left="#navSettings">
+        <section class="settings-card settings-block">
+            <div class="settings-block-title"><span class="dot"></span><strong>Account</strong></div>
+            <div class="settings-row-line"><span>Profile Settings</span><span>John Doe <span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+            <div class="settings-row-line"><span>Email</span><span>john@example.com <span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+            <div class="settings-row-line"><span>Subscription</span><span>Premium <span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+        </section>
+
+        <section class="settings-card settings-block">
+            <div class="settings-block-title"><span class="dot"></span><strong>Playback</strong></div>
+            @foreach (var option in Model.PlaybackOptions)
+            {
+                if (option.IsToggle)
+                {
+                    <div class="settings-row-line">
+                        <span>@option.Name</span>
+                        <button class="settings-toggle tv-focusable @(option.IsEnabled ? "is-on" : string.Empty)" id="settingsAutoplayToggle" type="button" data-nav-up="#settingsVideoQualityChoices"></button>
+                    </div>
+                }
+                else
+                {
+                    <div class="settings-row-line">
+                        <span>@option.Name</span>
+                        <div class="setting-choice-group tv-focus-scope" id="settingsVideoQualityChoices" data-focus-scope data-choice-group data-nav-type="choice-row" data-nav-up="self" data-nav-down="#settingsAutoplayToggle">
+                            @foreach (var choice in option.Choices)
+                            {
+                                <button class="setting-choice compact tv-focusable @(choice == option.SelectedChoice ? "is-selected" : string.Empty)" type="button" data-choice-label="@choice">@choice</button>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            <div class="settings-row-line"><span>Subtitles</span><span>English <span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+        </section>
+
+        <section class="settings-card settings-block">
+            <div class="settings-block-title"><span class="dot"></span><strong>Notifications</strong></div>
+            @foreach (var option in Model.NotificationOptions)
+            {
+                <div class="settings-row-line"><span>@option.Name</span><button class="settings-toggle tv-focusable @(option.IsEnabled ? "is-on" : string.Empty)" type="button"></button></div>
+            }
+        </section>
+
+        <section class="settings-card settings-block">
+            <div class="settings-block-title"><span class="dot"></span><strong>Appearance</strong></div>
+            <div class="settings-row-line"><span>Dark Mode</span><button class="settings-toggle tv-focusable is-on" id="darkModeToggle" type="button"></button></div>
+            @foreach (var option in Model.AppearanceOptions)
+            {
+                <div class="settings-row-line">
+                    <span>@option.Name</span>
+                    <div class="setting-choice-group tv-focus-scope" id="settingsThemeChoices" data-focus-scope data-choice-group data-nav-type="choice-row">
+                        @foreach (var choice in option.Choices)
+                        {
+                            <button class="setting-choice compact tv-focusable @(choice == option.SelectedChoice ? "is-selected" : string.Empty)" type="button" data-choice-label="@choice" data-nav-up="#darkModeToggle">@choice</button>
+                        }
+                    </div>
+                </div>
+            }
+        </section>
+
+        <section class="settings-card settings-block">
+            <div class="settings-block-title"><span class="dot"></span><strong>Privacy &amp; Security</strong></div>
+            <div class="settings-row-line"><span>Privacy Settings</span><span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+            <div class="settings-row-line"><span>Viewing History</span><span>Enabled <span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+            <div class="settings-row-line"><span>Data Usage</span><span>2.4 GB <span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+        </section>
+
+        <section class="settings-card settings-block">
+            <div class="settings-block-title"><span class="dot"></span><strong>Language &amp; Region</strong></div>
+            @foreach (var option in Model.LanguageOptions)
+            {
+                <div class="settings-row-line">
+                    <span>@option.Name</span>
+                    <div class="setting-choice-group tv-focus-scope" id="settingsLanguageChoices" data-focus-scope data-choice-group data-nav-type="choice-row">
+                        @foreach (var choice in option.Choices)
+                        {
+                            <button class="setting-choice compact tv-focusable @(choice == option.SelectedChoice ? "is-selected" : string.Empty)" type="button" data-choice-label="@choice" data-nav-down="self">@choice</button>
+                        }
+                    </div>
+                </div>
+            }
+            <div class="settings-row-line"><span>Region</span><span>United States <span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+        </section>
+
+        <section class="settings-card settings-block">
+            <div class="settings-block-title"><span class="dot"></span><strong>About</strong></div>
+            <div class="settings-row-line"><span>Version</span><span>1.0.0 <span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+            <div class="settings-row-line"><span>Terms of Service</span><span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+            <div class="settings-row-line"><span>Privacy Policy</span><span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span></span></div>
+        </section>
+
+    </div>
+
+    <footer class="settings-footer">
+        <button class="logout-small tv-focusable" type="button" data-toast="Sign out is a demo action for now" aria-label="Sign out">
+            <span class="logout-label">Sign Out</span>
+        </button>
+    </footer>
+</div>
+</div>

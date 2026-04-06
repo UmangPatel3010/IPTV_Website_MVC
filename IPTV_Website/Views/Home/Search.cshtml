@@ -1,0 +1,70 @@
+﻿@model IPTV_Website.Models.SearchViewModel
+@{
+    ViewData["Title"] = "Search";
+    ViewData["ActivePage"] = "search";
+}
+
+<div class="tv-page section-shell search-page">
+    <section class="section-top search-top">
+        <div class="section-title-block">
+            <div class="section-icon search" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z" fill="currentColor" />
+                </svg>
+            </div>
+            <div>
+                <h1>Search</h1>
+            </div>
+        </div>
+    </section>
+
+    <div class="search-shell tv-focus-scope" id="searchBarSection" data-focus-scope data-nav-type="single-input" data-nav-down="#searchPopularSection">
+        <button class="search-input tv-focusable" type="button" data-autofocus data-toast="Keyboard search will be wired later" aria-label="Open search">
+            <span class="search-leading" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z" fill="currentColor" />
+                </svg>
+            </span>
+            <span>Search for channels, categories, countries...</span>
+        </button>
+    </div>
+
+    <section class="content-section search-only section-card-surface">
+        <div class="section-header slim-header with-accent"><div><h2><span aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span> Popular Searches</h2></div></div>
+        <div class="keyword-grid tv-focus-scope" id="searchPopularSection" data-focus-scope data-nav-type="grid" data-nav-up="#searchBarSection" data-nav-down="#searchResultsSection">
+            @foreach (var term in Model.PopularTerms)
+            {
+                <button class="keyword-tile tv-focusable" type="button" data-toast="@term selected for demo">@term</button>
+            }
+        </div>
+    </section>
+
+    @if (Model.Results.Count > 0)
+    {
+        <section class="content-section section-card-surface search-results">
+            <div class="section-header slim-header"><div><h2>Suggested Results</h2></div></div>
+            <div class="channel-grid tv-focus-scope" id="searchResultsSection" data-focus-scope data-nav-type="grid" data-nav-up="#searchPopularSection">
+                @foreach (var channel in Model.Results)
+                {
+                    var cardId = $"searchCard-{channel.Id}";
+                    <article class="channel-card tv-card tv-focusable" id="@cardId" tabindex="0" data-nav-role="card" data-href="/Home/Player?ChannelId=@(channel.Id)">
+                        <div class="channel-thumb" style="background-image:url('@channel.ImageUrl')"></div>
+                        <div class="channel-body compact-body">
+                            <div class="channel-title-row">
+                                <h3>@channel.Name</h3>
+                                <button class="favorite-badge tv-focusable icon-only @(channel.IsFavorite ? "is-active" : string.Empty)" type="button" data-nav-role="subaction" data-parent-card="#@cardId" data-favorite-toggle data-favorite-state="@(channel.IsFavorite.ToString().ToLowerInvariant())" data-favorite-label="@channel.Name" aria-label="Toggle favorite">
+                                    <span class="favorite-heart" aria-hidden="true">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 21s-7.5-4.73-9.33-7.02C1.12 11.61 2.5 7.5 6 6.5 8 5.9 10 7 12 9c2-2 4-3.1 6-2.5 3.5 1 4.88 5.11 3.33 7.48C19.5 16.27 12 21 12 21z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+                            <p>@channel.Category</p>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+</div>

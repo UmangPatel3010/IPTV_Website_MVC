@@ -1,0 +1,91 @@
+@model IPTV_Website.Models.PlayerViewModel
+
+@{
+    ViewData["Title"] = $"{Model.Channel.Name} Player";
+    ViewData["ActivePage"] = "player";
+    ViewData["BackUrl"] = "/";
+}
+<section class="player-page">
+    <div class="player-canvas" style="background-image:url('@Model.Channel.ImageUrl')"></div>
+    <div class="player-layer">
+        <div class="player-topbar tv-focus-scope" id="playerTopSection" data-focus-scope data-nav-type="single-item" data-nav-down="#playerChannelSwitchSection">
+            <a class="player-back tv-focusable" id="playerBackButton" href='/' data-autofocus aria-label="Back to home">
+                <span class="player-back-icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </span>
+            </a>
+            <div class="player-status"><span class="pill live live-float">LIVE</span></div>
+        </div>
+
+        <div class="player-bottom-dock">
+            <div class="player-brand-card">
+                <div class="channel-logo">@Model.Channel.Name.Substring(0, Math.Min(4, Model.Channel.Name.Length)).ToUpperInvariant()</div>
+                <div class="player-number-stack tv-focus-scope" id="playerChannelSwitchSection" data-focus-scope data-nav-type="vertical-list" data-nav-up="#playerBackButton" data-nav-down="#playerToolbarSection">
+                    <a class="tv-focusable" id="playerChannelUp" type="button" aria-label="Previous channel" data-nav-left="self" data-nav-up="#playerBackButton" data-nav-right="#playerToolbarSection" href="/Home/Player?ChannelId=@Model.PrevChannelId">
+                        @* <span class="icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 6l-6 8h12l-6-8z" fill="currentColor" />
+                            </svg>
+                        </span> *@
+                        <img src="/assets/mock/channel_arrow_up.svg" alt="Arrow Up">
+                    </a>
+                    <div class="player-channel-number large">@Model.Channel.ChannelNumber</div>
+                    <a class="tv-focusable" id="playerChannelDown" type="button" aria-label="Next channel" data-nav-left="self" data-nav-down="self" data-nav-right="#playerToolbarSection" href="/Home/Player?ChannelId=@Model.NextChannelId">
+                        @* <span class="icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 18l6-8H6l6 8z" fill="currentColor" />
+                            </svg>
+                        </span> *@
+                        <img src="/assets/mock/channel_arrow_down.svg" alt="Arrow Down">
+
+                    </a>
+                </div>
+            </div>
+
+            <div class="player-program-block">
+                <div class="player-title-line">
+                    <h1>@Model.Channel.Name</h1>
+                    <span class="player-show-name">@Model.Channel.CurrentProgram</span>
+                </div>
+                <div class="player-schedule-row">
+                    <div class="schedule-pill live-now">@Model.Channel.CurrentProgramTime.ToUpperInvariant()</div>
+                    <div class="schedule-pill next-show">@Model.Channel.NextProgramTime.ToUpperInvariant()</div>
+                    <div class="schedule-pill next-show">@Model.Channel.NextProgramTime.ToUpperInvariant()</div>
+                    <div class="schedule-pill next-show">@Model.Channel.NextProgramTime.ToUpperInvariant()</div>
+                    <div class="schedule-pill next-show">@Model.Channel.NextProgramTime.ToUpperInvariant()</div>
+                </div>
+            </div>
+
+            <div class="player-controls tv-focus-scope" id="playerToolbarSection" data-focus-scope data-nav-type="horizontal-actions" data-nav-up="#playerBackButton" data-nav-down="self">
+                <button class="control-button wide tv-focusable" id="openChannelList" type="button" data-nav-left="#playerChannelDown" data-nav-down="self" data-open-overlay="#channelOverlay">Channels</button>
+                <button class="control-button tv-focusable" type="button" data-toast="Guide overlay is a demo action" data-nav-down="self">Guide</button>
+                <button class="control-button tv-focusable" type="button" data-toast="Fullscreen is already represented in the demo" data-nav-down="self">Fullscreen</button>
+            </div>
+        </div>
+    </div>
+
+    <aside class="player-overlay" id="channelOverlay" data-overlay hidden>
+        <div class="overlay-title"><h2>All Channels</h2></div>
+        <label class="overlay-search tv-focusable" id="playerOverlaySearch" tabindex="0" data-nav-down="#playerChannelOverlayList" data-nav-up="self" data-toast="Search inside player will be connected later" aria-label="Search">
+            <span class="search-leading" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z" fill="currentColor" />
+                </svg>
+            </span>
+            <input type="text" placeholder="Search" readonly aria-label="Search" />
+        </label>
+        <div class="channel-list tv-focus-scope" id="playerChannelOverlayList" data-focus-scope data-nav-type="vertical-list" data-nav-up="#playerOverlaySearch" data-nav-down="self">
+            @foreach (var channel in Model.AllChannels)
+            {
+                <a class="channel-list-item tv-focusable @(channel.Id == Model.Channel.Id ? "is-active" : string.Empty)" type="button" asp-controller="Home" asp-action="Player" asp-route-ChannelId="@channel.Id">
+                    <span class="list-logo">@channel.Name.Substring(0, Math.Min(2, channel.Name.Length)).ToUpperInvariant()</span>
+                    <span class="list-copy"><span class="list-title">@channel.Name</span><span class="list-meta">@channel.Category</span></span>
+                    <span class="list-number">@channel.ChannelNumber</span>
+                </a>
+            }
+        </div>
+        
+    </aside>
+</section>

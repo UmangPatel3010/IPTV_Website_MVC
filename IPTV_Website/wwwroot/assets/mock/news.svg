@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#38101b"/><stop offset="1" stop-color="#ac2d3e"/></linearGradient></defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <circle cx="960" cy="160" r="200" fill="#ffb07a" opacity=".2"/>
+  <rect x="90" y="110" width="210" height="34" rx="17" fill="#ffffff" opacity=".14"/>
+  <rect x="90" y="170" width="460" height="98" rx="22" fill="#ffffff" opacity=".1"/>
+  <rect x="90" y="294" width="360" height="28" rx="14" fill="#ffffff" opacity=".1"/>
+  <rect x="90" y="354" width="180" height="56" rx="28" fill="#ff6c53"/>
+  <text x="90" y="520" fill="#fff" font-size="96" font-family="Segoe UI, Arial" font-weight="700">GLOBAL NEWS</text>
+</svg>

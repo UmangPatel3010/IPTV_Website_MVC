@@ -1,0 +1,64 @@
+@model IPTV_Website.Models.FavoritesViewModel
+
+@{
+    ViewData["Title"] = "Favorites";
+    ViewData["ActivePage"] = "favorites";
+}
+<div class="tv-page section-shell favorites-layout">
+    <section class="section-top compact-top">
+        <div class="section-title-block">
+            <div class="section-icon favorites" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21s-7.5-4.73-9.33-7.02C1.12 11.61 2.5 7.5 6 6.5 8 5.9 10 7 12 9c2-2 4-3.1 6-2.5 3.5 1 4.88 5.11 3.33 7.48C19.5 16.27 12 21 12 21z" fill="currentColor" />
+                </svg>
+            </div>
+            <div>
+                <h1>My Favorites</h1>
+                <p>@(Model.Empty ? "No favorites yet" : $"{Model.FavoriteChannels.Count} channels saved")</p>
+            </div>
+        </div>
+    </section>
+
+    @if (Model.Empty)
+    {
+        <section class="empty-state tv-focus-scope favorites-empty" id="favoritesPrimarySection" data-focus-scope data-nav-type="single-item">
+            <div class="empty-icon" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="currentColor" />
+                </svg>
+            </div>
+            <h2>No Favorites Yet</h2>
+            <p>Start adding channels to your favorites by clicking the heart icon on any channel</p>
+            <a class="tv-button primary-action tv-focusable" id="favoritesExploreButton" data-autofocus href='/'>Explore Channels</a>
+        </section>
+    }
+    else
+    {
+        <section class="favorites-grid tv-focus-scope" id="favoritesPrimarySection" data-focus-scope data-nav-type="grid">
+            @foreach (var channel in Model.FavoriteChannels)
+            {
+                var cardId = $"favoriteCard-{channel.Id}";
+                <article class="channel-card tv-card tv-focusable" id="@cardId" tabindex="0" data-nav-role="card" data-href="/Home/Player?ChannelId=@(channel.Id)">
+                    <div class="channel-thumb" style="background-image:url('@channel.ImageUrl')">
+                        <span class="badge live">LIVE</span>
+                        <span class="badge quality">@channel.Quality</span>
+                    </div>
+                    <div class="channel-body compact-body">
+                        <div class="channel-title-row">
+                            <h3>@channel.Name</h3>
+                            <button class="favorite-badge tv-focusable icon-only is-active" type="button" data-nav-role="subaction" data-parent-card="#@cardId" data-favorite-toggle data-favorite-state="true" data-favorite-label="@channel.Name" aria-label="Remove from favorites">
+                                <span class="favorite-heart" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 21s-7.5-4.73-9.33-7.02C1.12 11.61 2.5 7.5 6 6.5 8 5.9 10 7 12 9c2-2 4-3.1 6-2.5 3.5 1 4.88 5.11 3.33 7.48C19.5 16.27 12 21 12 21z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+                        <p>@channel.Category</p>
+                        <div class="channel-meta compact-meta"><span>@channel.ViewerLabel</span><span>@channel.Language</span></div>
+                    </div>
+                </article>
+            }
+        </section>
+    }
+</div>
