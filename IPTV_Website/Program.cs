@@ -4,13 +4,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-//builder.Services.AddSingleton<IMockTvDataService, MockTvDataService>();
-builder.Services.AddHttpClient<ApiTvDataService>(client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
-});
+builder.Services.AddSingleton<IMockTvDataService, MockTvDataService>();
+//builder.Services.AddHttpClient<ApiTvDataService>(client =>
+//{
+//    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
+//});
 
-builder.Services.AddScoped<IMockTvDataService, ApiTvDataService>();
+//builder.Services.AddScoped<IMockTvDataService, ApiTvDataService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
