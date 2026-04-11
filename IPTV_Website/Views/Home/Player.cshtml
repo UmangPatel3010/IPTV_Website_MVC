@@ -6,7 +6,12 @@
     ViewData["BackUrl"] = "/";
 }
 <section class="player-page">
-    <div class="player-canvas" style="background-image:url('@Model.Channel.ImageUrl')"></div>
+    @* <div class="player-canvas" style="background-image:url('@Model.Channel.ImageUrl')"></div> *@
+    <div class="player-canvas">
+        <video id="drmPlayer" controls autoplay style="width: 100%; height: 100%;">
+            <source type="application/x-mpegURL">
+        </video>
+    </div>
     <div class="player-layer">
         <div class="player-topbar tv-focus-scope" id="playerTopSection" data-focus-scope data-nav-type="single-item" data-nav-down="#playerChannelSwitchSection">
             <a class="player-back tv-focusable" id="playerBackButton" href='/' data-autofocus aria-label="Back to home">
@@ -89,3 +94,31 @@
         
     </aside>
 </section>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.body.click()
+            var video = document.getElementById('drmPlayer');
+            var videoSrc = '@(Model.Channel.Url)'; // Ensure your Model has the stream URL
+
+            if (Hls.isSupported()) {
+                var hls = new Hls();
+                hls.loadSource(videoSrc);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play();
+                });
+            }
+            // For Safari (which supports HLS natively)
+            else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                console.log("Native HLS support detected. Setting video source directly.");
+                video.src = videoSrc;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play();
+                });
+            }
+        });
+    </script>
+}

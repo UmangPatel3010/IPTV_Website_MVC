@@ -53,5 +53,7 @@
     </main>
     <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
