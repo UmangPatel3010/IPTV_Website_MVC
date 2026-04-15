@@ -1,6 +1,8 @@
 using IPTV_Website.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSession();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -8,6 +10,7 @@ builder.Services.AddSingleton<IMockTvDataService, MockTvDataService>();
 //builder.Services.AddHttpClient<ApiTvDataService>(client =>
 //{
 //    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
+//    client.DefaultRequestHeaders.Add("Accept", "application/json");
 //});
 
 //builder.Services.AddScoped<IMockTvDataService, ApiTvDataService>();
@@ -20,7 +23,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
+app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -30,6 +33,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{data?}");
 
 app.Run();

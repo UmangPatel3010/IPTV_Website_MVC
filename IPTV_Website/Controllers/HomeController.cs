@@ -1,7 +1,7 @@
 using IPTV_Website.Models;
 using IPTV_Website.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections;
+using IPTV_Website.Models.ApiModels;
 using System.Diagnostics;
 
 namespace IPTV_Website.Controllers
@@ -16,8 +16,15 @@ namespace IPTV_Website.Controllers
             _logger = logger;
             _tvDataService = tvDataService;
         }
+        public IActionResult Index(string data)
+        {
+            //if (data == null)
+            //     return RedirectToAction("Error");
 
-        public IActionResult Index()
+            return RedirectToAction("Dashboard");
+        }
+
+        public IActionResult Dashboard()
         {
             var channels = _tvDataService.GetAllChannels().ToList();
             var trendingChannels = channels.ToList(); // Example logic for trending channels
@@ -46,19 +53,34 @@ namespace IPTV_Website.Controllers
             return View(viewModel);
         }
 
-        public IActionResult Settings()
+        public IActionResult SubscriberDetails()
         {
-            var options = _tvDataService.GetSettingOptions().ToList();
-
-            var viewModel = new SettingsViewModel
+            // Example data for demonstration
+            var subscriber = new SubscriptionDetailModel
             {
-                PlaybackOptions = options.Where(option => option.Section == "Playback").ToList(),
-                NotificationOptions = options.Where(option => option.Section == "Notifications").ToList(),
-                AppearanceOptions = options.Where(option => option.Section == "Appearance").ToList(),
-                LanguageOptions = options.Where(option => option.Section == "Language").ToList()
+                Name = "John Doe",
+                SubNo = "SUB12345",
+                Address = "123 Main Street",
+                Pincode = 123456,
+                Email = "john.doe@example.com",
+                Mobile = "9876543210",
+                Status = 1,
+                DeviceNo = "DEV123",
+                SerialNo = "SER456",
+                NoOfChannels = 120,
+                Subscriptions = new List<SubscriptionList>
+                {
+                    new SubscriptionList{
+                        Name = "Premium Plan",
+                        ServiceID = 101,
+                        Type = "Monthly",
+                        StartDate = DateTime.Now,
+                        EndDate = DateTime.Now.AddMonths(1)
+                    }
+                }
             };
 
-            return View(viewModel);
+            return View(subscriber);
         }
 
         public IActionResult Search(string query)

@@ -24,44 +24,39 @@
 
         #region Dashboard
 
-        public const string App_Channels = "/Dashboard/APP_Channels";
+        public const string App_Channels = "/Dashboard/APP_Channels?SubNo={0}";
         public const string Images = "/Dashboard/Images";
 
         #endregion
 
         #region EPG
 
-        public const string EPG_Get = "/EPG/Get";
+        public const string EPG_Get = "/EPG/Get?ServiceID={0}";
 
         #endregion
 
         #region FingerPrint
 
-        public const string FingerPrint_Get = "/FingerPrint/Get";
+        public const string FingerPrint_Get = "/FingerPrint/Get?deviceNo={0}";
 
         #endregion
 
         #region Inventory
 
-        public const string APP_DeviceStatus = "/Inventory/APP_DeviceStatus";
+        public const string APP_DeviceStatus = "/Inventory/APP_DeviceStatus?DeviceNo={0}";
 
         #endregion
 
         #region OSD
 
-        public const string OSD_Get = "/OSD/Get";
+        public const string OSD_Get = "/OSD/Get?deviceNo={0}";
 
         #endregion
 
         #region Subscriber
 
-        public const string Subscriber = "/Subscriber/APP_SubscribedChannels";
-
-        #endregion
-
-        #region Subcription
-
-        public const string Subcription = "/Subscriber/GetSubcriptionBySubsciber";
+        public const string APP_SubscribedChannels = "/Subscriber/APP_SubscribedChannels?SubNo={0}";
+        public const string GetSubcriptionBySubsciber = "/Subscriber/GetSubcriptionBySubsciber?DeviceNo={0}";
 
         #endregion
     }

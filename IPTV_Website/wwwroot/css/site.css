@@ -146,7 +146,6 @@ body:not(.sidebar-collapsed) .side-nav .menu-toggle {
 .page-intro p,
 .hero-copy,
 .channel-body p,
-.mini-body p,
 .settings-row-line,
 .empty-state p,
 .player-show-name { color: var(--muted); }
@@ -328,8 +327,7 @@ body:not(.sidebar-collapsed) .side-nav .menu-toggle {
     inset: 0;
     background: linear-gradient(180deg, rgba(0,0,0,.04) 0%, rgba(0,0,0,.32) 100%);
 }
-.channel-body,
-.mini-body { padding: 12px 14px 14px; }
+.channel-body{ padding: 12px 14px 14px; }
 .compact-body h3 { font-size: 15px; font-weight: 600; }
 .channel-title-row {
     display: flex;

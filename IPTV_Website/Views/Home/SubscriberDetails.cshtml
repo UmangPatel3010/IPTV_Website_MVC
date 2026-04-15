@@ -1,0 +1,114 @@
+@model IPTV_Website.Models.ApiModels.SubscriptionDetailModel
+@{
+    ViewData["Title"] = "Subscriber Details";
+    ViewData["ActivePage"] = "subscriberdetails";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/SubscriberDetails.css" />
+}
+<section class="subscriber-details-screen">
+    <section class="section-top compact-top">
+        <div class="section-title-block">
+            <div class="section-icon settings" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="3" fill="currentColor" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 8.92 4.6H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.36.61.93 1 1.6 1H21a2 2 0 0 1 0 4h-.09c-.67 0-1.24.39-1.51 1z" fill="currentColor" />
+                </svg>
+            </div>
+            <div>
+                <h1>Subscriber Details</h1>
+                <p class="m-0">Manage your subscription information</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section section-card-surface">
+        <div class="subscriber-details-stack tv-focus-scope">
+        <div class="tv-card subscriber-details-card ">
+            <h2 class="subscriber-details-block-title">Personal Information</h2>
+            <div class="subscriber-details-row-line">
+                <span>Name:</span>
+                <span>@Model.Name</span>
+            </div>
+            <div class="subscriber-details-row-line">
+                <span>Subscription Number:</span>
+                <span>@Model.SubNo</span>
+            </div>
+            <div class="subscriber-details-row-line">
+                <span>Address:</span>
+                <span>@Model.Address</span>
+            </div>
+            <div class="subscriber-details-row-line">
+                <span>Pincode:</span>
+                <span>@Model.Pincode</span>
+            </div>
+        </div>
+
+        <div class="tv-card subscriber-details-card ">
+            <h2 class="subscriber-details-block-title">Contact Details</h2>
+            <div class="subscriber-details-row-line">
+                <span>Email:</span>
+                <span>@Model.Email</span>
+            </div>
+            <div class="subscriber-details-row-line">
+                <span>Mobile:</span>
+                <span>@Model.Mobile</span>
+            </div>
+        </div>
+
+        <div class="tv-card subscriber-details-card ">
+            <h2 class="subscriber-details-block-title">Subscription Status</h2>
+            <div class="subscriber-details-row-line">
+                <span>Status:</span>
+                <span>@(Model.Status == 1 ? "Active" : "Inactive")</span>
+            </div>
+            <div class="subscriber-details-row-line">
+                <span>Device Number:</span>
+                <span>@Model.DeviceNo</span>
+            </div>
+            <div class="subscriber-details-row-line">
+                <span>Serial Number:</span>
+                <span>@Model.SerialNo</span>
+            </div>
+            <div class="subscriber-details-row-line">
+                <span>Number of Channels:</span>
+                <span>@Model.NoOfChannels</span>
+            </div>
+        </div>
+    </div>
+    </section>
+
+    @if (Model.Subscriptions != null && Model.Subscriptions.Any())
+{
+    <div class="subscriptions-container">
+        <h2 class="subscriber-details-block-title">Active Subscriptions</h2>
+        <div class="subscription-grid tv-focus-scope">
+            @foreach (var s in Model.Subscriptions)
+            {
+                <div class="subscription-tile " tabindex="0">
+                    <div class="tile-header">
+                        <h3 class="subscription-name">@s.Name</h3>
+                        <span class="pill">@s.Type</span>
+                    </div>
+                    
+                    <div class="tile-body">
+                        <span class="service-id">#@s.ServiceID</span>
+                    </div>
+
+                    <div class="tile-footer">
+                        <div class="date-group">
+                            <span class="date-label">START</span>
+                            <span class="date-value">@(s.StartDate?.ToString("dd MMM yyyy") ?? "-")</span>
+                        </div>
+                        <div class="date-separator"></div>
+                        <div class="date-group">
+                            <span class="date-label">EXPIRY</span>
+                            <span class="date-value">@(s.EndDate?.ToString("dd MMM yyyy") ?? "-")</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+</section>
