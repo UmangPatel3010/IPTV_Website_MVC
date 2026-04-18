@@ -1,3 +1,4 @@
+using IPTV_Website.Helpers;
 using IPTV_Website.Models;
 using IPTV_Website.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -18,10 +19,8 @@ namespace IPTV_Website.Controllers
         }
         public IActionResult Index(string data)
         {
-            //if (data == null)
-            //     return RedirectToAction("Error");
-
-            return RedirectToAction("Dashboard");
+            CommonVariables.setDeviceNo(string.IsNullOrWhiteSpace(data) ? "4C05A102A1A2" : data);
+            return View();
         }
 
         public IActionResult Dashboard()
@@ -127,6 +126,16 @@ namespace IPTV_Website.Controllers
             };
 
             return View(viewModel);
+        }
+
+        public async Task<IActionResult> HandleSignal(string eventKey)
+        {
+            // map only known keys (whitelist)
+            switch (eventKey)
+            {
+                default:
+                    return RedirectToAction("Dashboard");
+            }
         }
     }
 }

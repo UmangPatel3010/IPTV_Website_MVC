@@ -545,7 +545,13 @@
         activateElement(target);
     });
 
-    window.tvApp = { showToast: showToast, toggleSidebar: toggleSidebar };
+    window.tvApp = {
+        ...(window.tvApp || {}),
+        showToast: showToast,
+        toggleSidebar: toggleSidebar,
+        ensureSignalRConnected: window.tvSignalR?.ensureConnected
+    };
+
     normalizeFavorites();
     const toggle = getSidebarToggle();
     if (toggle) {

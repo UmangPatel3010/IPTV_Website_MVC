@@ -7,6 +7,11 @@ builder.Services.AddSession();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IMockTvDataService, MockTvDataService>();
+builder.Services.AddHttpClient<ApiTvDataService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 //builder.Services.AddHttpClient<ApiTvDataService>(client =>
 //{
 //    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);

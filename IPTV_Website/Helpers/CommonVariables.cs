@@ -12,7 +12,7 @@
         {
             _HttpContextAccessor.HttpContext.Session.SetString("Token", token);
         }
-        public static string? GetToken()
+        public static string? getToken()
         {
             if (_HttpContextAccessor.HttpContext.Session.GetString("Token") == null)
             {
