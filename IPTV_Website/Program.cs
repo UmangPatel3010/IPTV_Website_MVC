@@ -7,13 +7,18 @@ builder.Services.AddSession();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IMockTvDataService, MockTvDataService>();
-//builder.Services.AddHttpClient<ApiTvDataService>(client =>
-//{
-//    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
-//    client.DefaultRequestHeaders.Add("Accept", "application/json");
-//});
+builder.Services.AddHttpClient("ApiTvClient", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]!);
+    client.DefaultRequestHeaders.Add("IsApplication", "app");
+});
+builder.Services.AddSingleton<ApiTvDataService>(sp =>
+{
+    var factory = sp.GetRequiredService<IHttpClientFactory>();
+    var httpClient = factory.CreateClient("ApiTvClient");
+    return new ApiTvDataService(httpClient);
+});
 
-//builder.Services.AddScoped<IMockTvDataService, ApiTvDataService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,7 +29,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 app.UseSession();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

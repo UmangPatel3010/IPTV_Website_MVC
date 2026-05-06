@@ -1,30 +1,43 @@
+using IPTV_Website.Helpers;
 using IPTV_Website.Models;
+using IPTV_Website.Models.ApiModels;
 using IPTV_Website.Services;
 using Microsoft.AspNetCore.Mvc;
-using IPTV_Website.Models.ApiModels;
+using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Text;
 
 namespace IPTV_Website.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IMockTvDataService _tvDataService;
+        private readonly ApiTvDataService _apiTvDataService;
 
-        public HomeController(ILogger<HomeController> logger, IMockTvDataService tvDataService)
+        public HomeController(IMockTvDataService tvDataService, ApiTvDataService apiTvDataService)
         {
-            _logger = logger;
             _tvDataService = tvDataService;
+            _apiTvDataService = apiTvDataService;
         }
         public IActionResult Index(string data)
         {
-            //if (data == null)
-            //     return RedirectToAction("Error");
+            CommonVariables.setDeviceNo(string.IsNullOrWhiteSpace(data) ? "4C05A102A1A2" : data);
+            return View();
+        }
+        public async Task<IActionResult> Dashboard()
+        {
 
-            return RedirectToAction("Dashboard");
+            //CategoryWiseChannelCommonResponse categoryWiseChannelModel = await _apiTvDataService.APPChannels();
+
+            //if (categoryWiseChannelModel != null && categoryWiseChannelModel.StatusCode == 200)
+            //{
+            //    return View(categoryWiseChannelModel.Data);
+            //}
+
+            return RedirectToAction("Dashboard_copy");
         }
 
-        public IActionResult Dashboard()
+        public IActionResult Dashboard_copy()
         {
             var channels = _tvDataService.GetAllChannels().ToList();
             var trendingChannels = channels.ToList(); // Example logic for trending channels
@@ -53,8 +66,9 @@ namespace IPTV_Website.Controllers
             return View(viewModel);
         }
 
-        public IActionResult SubscriberDetails()
+        public async Task<IActionResult> SubscriberDetailsAsync()
         {
+            
             // Example data for demonstration
             var subscriber = new SubscriptionDetailModel
             {
@@ -80,6 +94,13 @@ namespace IPTV_Website.Controllers
                 }
             };
 
+
+            SubscriptionDetailModelCommonResponse subscriptionDetailModel = await _apiTvDataService.APPSubscribed();
+
+            if (subscriptionDetailModel != null && subscriptionDetailModel.StatusCode == 200)
+            {
+                return View(subscriptionDetailModel.Data.FirstOrDefault());
+            }
             return View(subscriber);
         }
 
@@ -127,6 +148,102 @@ namespace IPTV_Website.Controllers
             };
 
             return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> License()
+        {
+            using var reader = new StreamReader(Request.Body);
+            var requestBody = await reader.ReadToEndAsync();
+            var content = await _apiTvDataService.License(requestBody);
+
+            return Content(content, "application/json");
+        }
+        public async Task<IActionResult> ChannelPlay(long serviceNo, string channelURL)
+        {
+            var now = DateTime.Now;
+            var epg = new EpgDataCommonResponse
+            {
+                StatusCode = 200,
+                IsSuccess = true,
+                Message = "Success",
+                Data = new List<EpgData>
+                {
+                    new EpgData
+                    {
+                        Channel = $"Service {serviceNo}",
+                        DisplayName = "Sample Channel",
+                        LcnNo = serviceNo,
+                        BeforeDisplayName = "Previous Show",
+                        AfterDisplayName = "Next Show",
+                        Logo = null,
+                        Programs = new List<Programs>
+                        {
+                            new Programs
+                            {
+                                Name = "Morning News",
+                                Description = "Sample program from mock EPG response",
+                                StartDate = now.AddMinutes(-30),
+                                StopDate = now.AddMinutes(30)
+                            },
+                            new Programs
+                            {
+                                Name = "Midday Bulletin",
+                                Description = "Upcoming sample program",
+                                StartDate = now.AddMinutes(30),
+                                StopDate = now.AddMinutes(90)
+                            },
+                            new Programs
+                            {
+                                Name = "Evening Update",
+                                Description = "Later sample program",
+                                StartDate = now.AddMinutes(90),
+                                StopDate = now.AddMinutes(150)
+                            }
+                        }
+                    }
+                }
+            };
+
+            var viewModel = new ChannelPlayViewModel
+            {
+                ServiceNo = serviceNo,
+                ChannelUrl = channelURL,
+            };
+            EpgDataCommonResponse epgDataCommonResponse = await _apiTvDataService.EPGGet(serviceNo);
+
+            if (epgDataCommonResponse != null && epgDataCommonResponse.StatusCode == 200)
+            {
+                viewModel.EpgData = epgDataCommonResponse.Data;
+            }
+            else
+            {
+                viewModel.EpgData = epg.Data;
+
+            }
+
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ViewLog([FromBody] ViewLogModel model)
+        {
+            var response = await _apiTvDataService.APPViewLogs(model);
+            if (response != null)
+            {
+                return Json(response);
+            }
+            return RedirectToAction("Index");
+        }
+        public async Task<IActionResult> HandleSignal(string eventKey)
+        {
+            // map only known keys (whitelist)
+            switch (eventKey)
+            {
+                default:
+                    return RedirectToAction("Dashboard");
+            }
         }
     }
 }

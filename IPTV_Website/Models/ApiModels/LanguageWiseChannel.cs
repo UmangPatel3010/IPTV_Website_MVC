@@ -8,6 +8,6 @@ namespace IPTV_Website.Models.ApiModels
         public string? Language { get; set; }
 
         [JsonPropertyName("subscriberChannels")]
-        public List<SubscriberChannelsModelCommonResponse>? SubscriberChannels { get; set; }
+        public List<SubscriberChannelsModel>? SubscriberChannels { get; set; }
     }
 }

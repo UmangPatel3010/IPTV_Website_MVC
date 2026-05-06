@@ -1,0 +1,104 @@
+@using IPTV_Website.Helpers
+@model IPTV_Website.Models.ChannelPlayViewModel
+
+@{
+    var epgChannel = Model.EpgData.FirstOrDefault();
+    var programs = epgChannel?.Programs ?? new List<IPTV_Website.Models.ApiModels.Programs>();
+    var currentProgram = programs.FirstOrDefault();
+    var nextPrograms = programs.Skip(1).Take(4).ToList();
+
+    ViewData["Title"] = $"Service {Model.ServiceNo} Player";
+    ViewData["ActivePage"] = "player";
+}
+<section class="player-page">
+    <div class="player-canvas">
+        <video id="drmPlayer" autoplay style="width: 100%;height: 100%;object-fit: fill;"></video>
+    </div>
+    <div class="player-layer">
+        <div class="player-topbar tv-focus-scope" id="playerTopSection" data-focus-scope data-nav-type="single-item" data-nav-down="#playerChannelSwitchSection">
+            <a class="player-back tv-focusable" id="playerBackButton" href='/Home/Dashboard' data-autofocus aria-label="Back to dashboard test">
+                <span class="player-back-icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </span>
+            </a>
+            <div class="player-status"><span class="pill live live-float">LIVE</span></div>
+        </div>
+
+        <div class="player-bottom-dock">
+            <div class="player-brand-card">
+                <div class="channel-logo">@("S" + Model.ServiceNo)</div>
+                <div class="player-number-stack tv-focus-scope" id="playerChannelSwitchSection" data-focus-scope data-nav-type="vertical-list" data-nav-up="#playerBackButton" data-nav-down="#playerToolbarSection">
+                    <button class="tv-focusable" id="playerChannelUp" type="button" aria-label="Previous channel" data-nav-left="self" data-nav-up="#playerBackButton" data-nav-right="#playerToolbarSection" data-toast="Channel switch will be wired with API">
+                        <img src="/assets/mock/channel_arrow_up.svg" alt="Arrow Up">
+                    </button>
+                    <div class="player-channel-number large">@Model.ServiceNo</div>
+                    <button class="tv-focusable" id="playerChannelDown" type="button" aria-label="Next channel" data-nav-left="self" data-nav-down="self" data-nav-right="#playerToolbarSection" data-toast="Channel switch will be wired with API">
+                        <img src="/assets/mock/channel_arrow_down.svg" alt="Arrow Down">
+                    </button>
+                </div>
+            </div>
+
+            <div class="player-program-block">
+                <div class="player-title-line">
+                    <h1>@(epgChannel?.DisplayName ?? epgChannel?.Channel ?? $"Service {Model.ServiceNo}")</h1>
+                    <span class="player-show-name">@(currentProgram?.Name ?? "Program info not available")</span>
+                </div>
+                <div class="player-schedule-row">
+                    @if (currentProgram != null)
+                    {
+                        <div class="schedule-pill live-now">@($"{currentProgram.StartDate:hh:mm tt} - {currentProgram.StopDate:hh:mm tt}")</div>
+                    }
+                    @foreach (var next in nextPrograms)
+                    {
+                        <div class="schedule-pill next-show">@($"{next.StartDate:hh:mm tt} - {next.Name}")</div>
+                    }
+                </div>
+            </div>
+
+            <div class="player-controls tv-focus-scope" id="playerToolbarSection" data-focus-scope data-nav-type="horizontal-actions" data-nav-up="#playerBackButton" data-nav-down="self">
+                <button class="control-button wide tv-focusable" type="button" data-nav-left="#playerChannelDown" data-nav-down="self" data-toast="EPG loaded from sample response">EPG</button>
+                <button class="control-button tv-focusable" type="button" data-toast="Guide overlay is a demo action" data-nav-down="self">Guide</button>
+                <button class="control-button tv-focusable" type="button" data-toast="Fullscreen is already represented in the demo" data-nav-down="self">Fullscreen</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+                const video = document.getElementById('drmPlayer');
+                const player = new shaka.Player(video);
+
+                player.addEventListener('error', e => console.error('Error:', e));
+
+                // Force JSON header for ClearKey
+                player.getNetworkingEngine().registerRequestFilter((type, request) => {
+                    if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
+                        // request.headers['Content-Type'] = 'application/json';
+                        // request.headers['IsApplication'] = 'app';
+                        // request.headers['Token'] = 'xd2jsyci5WV+XGedvEfxOg==';
+                        console.log("Token:", '@CommonVariables.getToken()');
+                        console.log("License Request:", request);
+                    }
+                });
+		
+                player.configure({
+                    drm: {
+                        servers: {
+                            'org.w3.clearkey': '/Home/License'
+                        }
+                    }
+                });
+
+                try {
+                    await player.load('@Model.ChannelUrl')
+                    console.log('Loaded OK');
+                } catch (e) {
+                    console.error('Load Error:', e);
+                }
+            });
+    </script>
+}

@@ -545,11 +545,22 @@
         activateElement(target);
     });
 
-    window.tvApp = { showToast: showToast, toggleSidebar: toggleSidebar };
+    window.tvApp = {
+        ...(window.tvApp || {}),
+        showToast: showToast,
+        toggleSidebar: toggleSidebar,
+        ensureSignalRConnected: window.tvSignalR?.ensureConnected
+    };
+
     normalizeFavorites();
     const toggle = getSidebarToggle();
     if (toggle) {
         toggle.setAttribute("aria-expanded", isSidebarCollapsed() ? "false" : "true");
     }
-    focusInitial(getActiveScope());
+
+    const shouldSkipInitialFocus = document.body.dataset.skipInitialFocus === "true";
+
+    if (!shouldSkipInitialFocus) {
+        focusInitial(getActiveScope());
+    }
 })();

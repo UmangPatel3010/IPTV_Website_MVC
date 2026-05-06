@@ -12,7 +12,7 @@
         {
             _HttpContextAccessor.HttpContext.Session.SetString("Token", token);
         }
-        public static string? GetToken()
+        public static string? getToken()
         {
             if (_HttpContextAccessor.HttpContext.Session.GetString("Token") == null)
             {
@@ -28,7 +28,8 @@
         {
             if (_HttpContextAccessor.HttpContext.Session.GetString("SubNo") == null)
             {
-                return null;
+                //for tempory testing purpose : return 1 other return null
+                return "1";
             }
             return _HttpContextAccessor.HttpContext.Session.GetString("SubNo");
         }
