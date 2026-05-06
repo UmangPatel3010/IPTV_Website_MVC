@@ -695,6 +695,17 @@ body:not(.sidebar-collapsed) .side-nav .menu-toggle {
     gap: 14px;
 }
 
+.player-page.is-ui-hidden .player-layer,
+.player-page.is-ui-hidden .player-overlay {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease-in-out;
+}
+
+.player-page .player-layer,
+.player-page .player-overlay {
+    transition: opacity 0.25s ease-in-out;
+}
 .player-overlay[hidden] {
     display: none !important;
 }

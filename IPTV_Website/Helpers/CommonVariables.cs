@@ -28,7 +28,8 @@
         {
             if (_HttpContextAccessor.HttpContext.Session.GetString("SubNo") == null)
             {
-                return null;
+                //for tempory testing purpose : return 1 other return null
+                return "1";
             }
             return _HttpContextAccessor.HttpContext.Session.GetString("SubNo");
         }

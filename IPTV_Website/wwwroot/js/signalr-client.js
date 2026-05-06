@@ -44,7 +44,7 @@
             return "";
         }
         const separator = hubUrl.includes("?") ? "&" : "?";
-        return `${hubUrl}${separator}DeviceNo=${encodeURIComponent(deviceNo)}`;
+        return `${hubUrl}${separator}deviceNo=${encodeURIComponent(deviceNo)}`;
     }
 
     function ensureConnected() {
@@ -100,7 +100,7 @@
     window.tvSignalR.ensureConnected = ensureConnected;
 
     let connectFlow = Promise.resolve(); // Temporary for bypass purpose
-    connectFlow = ensureConnected(); // Temporary for bypass purpose: comment this single line while SignalR server is down.
+    //connectFlow = ensureConnected(); // Temporary for bypass purpose: comment this single line while SignalR server is down.
     //ensureConnected()
     connectFlow// remove connectFlow and uncmomment ensureConnected() 
         .then(() => {

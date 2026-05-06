@@ -1,8 +1,10 @@
 ﻿using IPTV_Website.Helpers;
+using IPTV_Website.Models;
 using IPTV_Website.Models.ApiModels;
 using Newtonsoft.Json;
+using System.Text;
 
-public class ApiTvDataService 
+public class ApiTvDataService
 {
     private readonly HttpClient _httpClient;
 
@@ -11,106 +13,205 @@ public class ApiTvDataService
         _httpClient = httpClient;
     }
 
+    public async Task<string> License(string requestBody)
+    {
+        await EnsureToken();
+        var handler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        };
+
+        using var client = new HttpClient(handler)
+        {
+            DefaultRequestHeaders =
+            {
+                { "IsApplication", "app" },
+                { "token", CommonVariables.getToken() }
+            }
+        };
+        var request = new HttpRequestMessage(HttpMethod.Post, ApiEndpoints.LicenseURL)
+        {
+            Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+        };
+
+        var response = await client.SendAsync(request);
+
+        return await response.Content.ReadAsStringAsync();
+    }
+
     public async Task EnsureToken()
     {
         var token = CommonVariables.getToken();
-
-        // If no token stored, fetch a new one
-        if (string.IsNullOrEmpty(token))
+        try
         {
-            var response = await _httpClient.GetAsync(ApiEndpoints.GenerateToken);
-            token = await response.Content.ReadAsStringAsync();
 
-            CommonVariables.setToken(token);
+            // If no token stored, fetch a new one
+            if (string.IsNullOrEmpty(token))
+            {
+                var response = await _httpClient.GetAsync(ApiEndpoints.GenerateToken);
+                response.EnsureSuccessStatusCode();
+                token = await response.Content.ReadAsStringAsync();
+
+                CommonVariables.setToken(token);
+            }
+
+            // Add header only if not already present
+            if (!_httpClient.DefaultRequestHeaders.Contains("token"))
+            {
+                _httpClient.DefaultRequestHeaders.Add("token", token);
+            }
+
         }
-
-        // Add header only if not already present
-        if (!_httpClient.DefaultRequestHeaders.Contains("Token"))
+        catch (Exception e)
         {
-            _httpClient.DefaultRequestHeaders.Add("Token", token);
+            Console.WriteLine(e.Message);
+
         }
     }
+
+    private static TResponse CreateErrorResponse<TResponse>(HttpResponseMessage response) where TResponse : new()
+    {
+        var errorResponse = new TResponse();
+        var responseType = typeof(TResponse);
+
+        responseType.GetProperty("Data")?.SetValue(errorResponse, null);
+        responseType.GetProperty("Message")?.SetValue(errorResponse, response.ReasonPhrase);
+        responseType.GetProperty("StatusCode")?.SetValue(errorResponse, (long)response.StatusCode);
+        responseType.GetProperty("IsSuccess")?.SetValue(errorResponse, false);
+
+        return errorResponse;
+    }
+
     public async Task<ViewLogModelCommonResponse> APPViewLogs(ViewLogModel viewLogModel)
     {
         await EnsureToken();
-        var response = _httpClient.PostAsJsonAsync($"{ApiEndpoints.App_ViewLogs}",viewLogModel).Result;
-        var jsonData = await response.Content.ReadAsStringAsync();
-        var viewLogModelCommonResponse = JsonConvert.DeserializeObject<ViewLogModelCommonResponse>(jsonData);
+        var response = await _httpClient.PostAsJsonAsync(ApiEndpoints.App_ViewLogs, viewLogModel);
 
-        return viewLogModelCommonResponse;
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonData = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<ViewLogModelCommonResponse>(jsonData) ?? new ViewLogModelCommonResponse();
+        }
+
+        return CreateErrorResponse<ViewLogModelCommonResponse>(response);
     }
 
     public async Task<CategoryWiseChannelCommonResponse> APPChannels()
     {
         await EnsureToken();
-        var response = _httpClient.GetAsync(string.Format(ApiEndpoints.App_Channels,CommonVariables.getSubNo())).Result;
-        var jsonData = await response.Content.ReadAsStringAsync();
-        var categoryWiseChannelCommonResponse = JsonConvert.DeserializeObject<CategoryWiseChannelCommonResponse>(jsonData);
+        try
+        {
+            var response = await _httpClient.GetAsync(string.Format(ApiEndpoints.App_Channels, CommonVariables.getSubNo()));
 
-        return categoryWiseChannelCommonResponse;
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonData = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<CategoryWiseChannelCommonResponse>(jsonData) ?? new CategoryWiseChannelCommonResponse();
+            }
+
+            return CreateErrorResponse<CategoryWiseChannelCommonResponse>(response);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
+
     public async Task<CmnResponse<string>> DashboardImages()
     {
         await EnsureToken();
-        var response = _httpClient.GetAsync(ApiEndpoints.Images).Result;
-        var jsonData = await response.Content.ReadAsStringAsync();
-        var cmnResponse = JsonConvert.DeserializeObject<CmnResponse<string>>(jsonData);
+        var response = await _httpClient.GetAsync(ApiEndpoints.Images);
 
-        return cmnResponse;
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonData = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<CmnResponse<string>>(jsonData) ?? new CmnResponse<string>();
+        }
+
+        return CreateErrorResponse<CmnResponse<string>>(response);
     }
-    public async Task<EpgDataCommonResponse> EPGGet(int serviceID)
+
+    public async Task<EpgDataCommonResponse> EPGGet(long serviceID)
     {
         await EnsureToken();
-        var response = _httpClient.GetAsync(string.Format(ApiEndpoints.EPG_Get,serviceID)).Result;
-        var jsonData = await response.Content.ReadAsStringAsync();
-        var epgDataCommonResponse = JsonConvert.DeserializeObject<EpgDataCommonResponse>(jsonData);
+        var response = await _httpClient.GetAsync(string.Format(ApiEndpoints.EPG_Get, serviceID));
 
-        return epgDataCommonResponse;
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonData = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<EpgDataCommonResponse>(jsonData) ?? new EpgDataCommonResponse();
+        }
+
+        return CreateErrorResponse<EpgDataCommonResponse>(response);
     }
 
     public async Task<CmnResponse<string>> FingerPrintGet()
     {
         await EnsureToken();
-        var response = _httpClient.GetAsync(string.Format(ApiEndpoints.FingerPrint_Get, CommonVariables.getDeviceNo())).Result;
-        var jsonData = await response.Content.ReadAsStringAsync();
-        var cmnResponse = JsonConvert.DeserializeObject<CmnResponse<string>>(jsonData);
+        var response = await _httpClient.GetAsync(string.Format(ApiEndpoints.FingerPrint_Get, CommonVariables.getDeviceNo()));
 
-        return cmnResponse;
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonData = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<CmnResponse<string>>(jsonData) ?? new CmnResponse<string>();
+        }
+
+        return CreateErrorResponse<CmnResponse<string>>(response);
     }
+
     public async Task<DeviceStatusModelCommonResponse> APPDeviceStatus()
     {
         await EnsureToken();
-        var response = _httpClient.GetAsync(string.Format(ApiEndpoints.APP_DeviceStatus, CommonVariables.getDeviceNo())).Result;
-        var jsonData = await response.Content.ReadAsStringAsync();
-        var deviceStatusModelCommonResponse = JsonConvert.DeserializeObject<DeviceStatusModelCommonResponse>(jsonData);
+        var response = await _httpClient.GetAsync(string.Format(ApiEndpoints.APP_DeviceStatus, CommonVariables.getDeviceNo()));
 
-        return deviceStatusModelCommonResponse;
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonData = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<DeviceStatusModelCommonResponse>(jsonData) ?? new DeviceStatusModelCommonResponse();
+        }
+
+        return CreateErrorResponse<DeviceStatusModelCommonResponse>(response);
     }
+
     public async Task<CmnResponse<string>> OSDGet()
     {
         await EnsureToken();
-        var response = _httpClient.GetAsync(string.Format(ApiEndpoints.OSD_Get, CommonVariables.getDeviceNo())).Result;
-        var jsonData = await response.Content.ReadAsStringAsync();
-        var cmnResponse = JsonConvert.DeserializeObject<CmnResponse<string>>(jsonData);
+        var response = await _httpClient.GetAsync(string.Format(ApiEndpoints.OSD_Get, CommonVariables.getDeviceNo()));
 
-        return cmnResponse;
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonData = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<CmnResponse<string>>(jsonData) ?? new CmnResponse<string>();
+        }
+
+        return CreateErrorResponse<CmnResponse<string>>(response);
     }
+
     public async Task<SubscriberChannelsModelCommonResponse> APPSubscribedChannels()
     {
         await EnsureToken();
-        var response = _httpClient.GetAsync(string.Format(ApiEndpoints.APP_SubscribedChannels, CommonVariables.getSubNo())).Result;
-        var jsonData = await response.Content.ReadAsStringAsync();
-        var subscriberChannelsModelCommonResponse = JsonConvert.DeserializeObject<SubscriberChannelsModelCommonResponse>(jsonData);
+        var response = await _httpClient.GetAsync(string.Format(ApiEndpoints.APP_SubscribedChannels, CommonVariables.getSubNo()));
 
-        return subscriberChannelsModelCommonResponse;
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonData = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<SubscriberChannelsModelCommonResponse>(jsonData) ?? new SubscriberChannelsModelCommonResponse();
+        }
+
+        return CreateErrorResponse<SubscriberChannelsModelCommonResponse>(response);
     }
+
     public async Task<SubscriptionDetailModelCommonResponse> APPSubscribed()
     {
         await EnsureToken();
-        var response = _httpClient.GetAsync(string.Format(ApiEndpoints.GetSubcriptionBySubsciber, CommonVariables.getDeviceNo())).Result;
-        var jsonData = await response.Content.ReadAsStringAsync();
-        var subscriptionDetailModelCommonResponse = JsonConvert.DeserializeObject<SubscriptionDetailModelCommonResponse>(jsonData);
+        var response = await _httpClient.GetAsync(string.Format(ApiEndpoints.GetSubscriptionBySubscriber, CommonVariables.getDeviceNo()));
 
-        return subscriptionDetailModelCommonResponse;
+        if (response.IsSuccessStatusCode)
+        {
+            var jsonData = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<SubscriptionDetailModelCommonResponse>(jsonData) ?? new SubscriptionDetailModelCommonResponse();
+        }
+
+        return CreateErrorResponse<SubscriptionDetailModelCommonResponse>(response);
     }
 }

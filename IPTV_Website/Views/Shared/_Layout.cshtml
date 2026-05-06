@@ -12,22 +12,20 @@
     <title>@ViewData["Title"] - StreamHub TV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.16.3/shaka-player.ui.min.js"></script> *@
-    @* <script src="https://googleapis.com"></script> *@
-    
     @await RenderSectionAsync("Styles", required: false)
 
 </head>
 <body class="app-shell signalr-pending @(Context.Request.Path.ToString().Contains("/Player") ? "player-mode" : "sidebar-collapsed")"
       data-page="@((string?)ViewData["ActivePage"] ?? "home")"
-      data-back-url="@((string?)ViewData["BackUrl"] ?? "/")">
+      data-back-url="@((string?)ViewData["BackUrl"] ?? "/")"
+      data-skip-initial-focus="@((ViewData["SkipInitialFocus"] as bool? == true) ? "true" : "false")">
     <div id="signalrGate" class="signalr-gate-overlay">
         <div id="signalrGateCard" class="signalr-gate-card">Connecting to server...</div>
     </div>
     @{
         var activePage = ((string?)ViewData["ActivePage"] ?? string.Empty).ToLowerInvariant();
     }
-    @if (!Context.Request.Path.ToString().Contains("/Player"))
+    @if (!Context.Request.Path.ToString().Contains("/Player") && !Context.Request.Path.ToString().Contains("/ChannelPlay"))
     {
         <aside class="side-nav tv-focus-scope" id="sideNavSection" data-focus-scope data-scope-id="side-nav" data-nav-type="vertical-menu" data-nav-right="#homeHeroActions">
             <a class="brand tv-focusable" href='/'>
@@ -76,6 +74,8 @@
                 return @Html.Raw(System.Text.Json.JsonSerializer.Serialize(deviceNo));
             };
     </script>
+    @* <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script> *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.8.9/shaka-player.compiled.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
     <script src="~/js/signalr-client.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

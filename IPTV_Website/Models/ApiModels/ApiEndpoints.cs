@@ -56,8 +56,19 @@
         #region Subscriber
 
         public const string APP_SubscribedChannels = "/Subscriber/APP_SubscribedChannels?SubNo={0}";
-        public const string GetSubcriptionBySubsciber = "/Subscriber/GetSubcriptionBySubsciber?DeviceNo={0}";
 
+        #endregion
+
+        #region Subscription
+        
+        public const string GetSubscriptionBySubscriber = "/Subscription/GetSubscriptionBySubscriber?DeviceNo={0}";
+
+        #endregion
+
+        #region LicenseURL
+
+        public const string LicenseURL = "https://182.237.14.221/AcquireLicense";
+        
         #endregion
     }
 }

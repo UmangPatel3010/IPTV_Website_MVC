@@ -557,5 +557,10 @@
     if (toggle) {
         toggle.setAttribute("aria-expanded", isSidebarCollapsed() ? "false" : "true");
     }
-    focusInitial(getActiveScope());
+
+    const shouldSkipInitialFocus = document.body.dataset.skipInitialFocus === "true";
+
+    if (!shouldSkipInitialFocus) {
+        focusInitial(getActiveScope());
+    }
 })();
