@@ -1,0 +1,113 @@
+﻿@model List<IPTV_Website.Models.ApiModels.CategoryWiseChannel>
+
+@{
+    ViewData["Title"] = "Dashboard UI Test";
+    ViewData["ActivePage"] = "home";
+
+    var firstCategory = Model?.FirstOrDefault();
+    var firstLanguage = firstCategory?.LanguageChannels?.FirstOrDefault();
+    var firstChannel = firstLanguage?.SubscriberChannels?.FirstOrDefault();
+    var hasCategories = Model != null && Model.Any();
+
+    var heroName = firstChannel?.AppDisplayName ?? firstChannel?.ChannelName ?? "Live Channels";
+    var heroDescription = firstChannel?.Description ?? "Dashboard preview bound to CategoryWiseChannel model";
+    var heroCategory = firstChannel?.Category ?? firstCategory?.Category ?? "General";
+    var heroLanguage = firstChannel?.Language ?? firstLanguage?.Language ?? "N/A";
+    var heroBackdrop = firstChannel?.Logo ?? firstCategory?.CategoryLogo ?? string.Empty;
+}
+<section class="home-page">
+    <section class="hero-panel tv-focus-scope" id="homeHeroActions" data-focus-scope data-scope-id="home-hero" data-nav-type="horizontal-actions" data-nav-up="self" data-nav-down="@(hasCategories ? "#homeViewAllSection-1" : "self")">
+        <div class="hero-backdrop" style="background-image:url('@heroBackdrop')"></div>
+        <div class="hero-content">
+            <div class="eyebrow">Dashboard Test</div>
+            <div class="hero-meta tight-meta">
+                <span class="pill live">LIVE NOW</span>
+                <span class="pill audience">@heroLanguage</span>
+                <span class="pill">@heroCategory</span>
+            </div>
+            <h1 class="hero-title">@heroName</h1>
+            <p class="hero-copy">@heroDescription</p>
+            <div class="hero-actions compact-actions">
+                <button class="tv-button tv-focusable primary-action" id="homeWatchNow" data-autofocus type="button" data-toast="Dashboard UI test mode">Watch Now</button>
+            </div>
+        </div>
+    </section>
+
+    @if (hasCategories)
+    {
+        var sectionIndex = 0;
+        foreach (var category in Model)
+        {
+            sectionIndex++;
+            var sectionId = $"homeTrendingGrid-{sectionIndex}";
+            var viewAllId = $"homeViewAllSection-{sectionIndex}";
+            var nextViewAllId = sectionIndex < Model.Count ? $"homeViewAllSection-{sectionIndex + 1}" : string.Empty;
+            var gridNavDownValue = string.IsNullOrEmpty(nextViewAllId) ? "self" : $"#{nextViewAllId}";
+            var previousCategoryLastChannelId = string.Empty;
+            if (sectionIndex > 1)
+            {
+                var previousCategory = Model[sectionIndex - 2];
+                var previousChannels = (previousCategory.LanguageChannels ?? new List<IPTV_Website.Models.ApiModels.LanguageWiseChannel>())
+                    .SelectMany(x => x.SubscriberChannels ?? new List<IPTV_Website.Models.ApiModels.SubscriberChannelsModel>())
+                    .ToList();
+                var previousLastChannel = previousChannels.LastOrDefault();
+                if (previousLastChannel != null)
+                {
+                    previousCategoryLastChannelId = $"#homeTrendCard-{previousLastChannel.ServiceID}-{previousLastChannel.LcnNo}";
+                }
+            }
+            var viewAllNavUpValue = sectionIndex == 1 ? "#homeHeroActions" : (string.IsNullOrEmpty(previousCategoryLastChannelId) ? "#homeHeroActions" : previousCategoryLastChannelId);
+            var allChannels = (category.LanguageChannels ?? new List<IPTV_Website.Models.ApiModels.LanguageWiseChannel>())
+                .SelectMany(x => x.SubscriberChannels ?? new List<IPTV_Website.Models.ApiModels.SubscriberChannelsModel>())
+                .ToList();
+
+            <section class="content-section home-trending-section">
+                <div class="section-header slim-header home-trending-header">
+                    <div class="section-heading-row with-dot">
+                        <span class="section-badge-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 6h-3V4a1 1 0 00-1-1H7a1 1 0 00-1 1v2H3a1 1 0 00-1 1v10a1 1 0 001 1h18a1 1 0 001-1V7a1 1 0 00-1-1zM8 18v-6h8v6H8z" fill="currentColor" />
+                            </svg>
+                        </span>
+                        <h2>@(category.Category ?? "Category")</h2>
+                    </div>
+                    <div class="tv-focus-scope" id="@viewAllId" data-focus-scope data-nav-type="single-item" data-nav-up="@viewAllNavUpValue" data-nav-down="#@sectionId">
+                        <button class="section-link tv-focusable" type="button" data-toast="More channels loaded from API model">View All</button>
+                    </div>
+                </div>
+
+                <div class="channel-grid tv-focus-scope" id="@sectionId" data-focus-scope data-nav-type="grid" data-nav-up="#@viewAllId" data-nav-down="@gridNavDownValue">
+                    @foreach (var channel in allChannels)
+                    {
+                        var cardId = $"homeTrendCard-{channel.ServiceID}-{channel.LcnNo}";
+                        var channelName = channel.AppDisplayName ?? channel.ChannelName ?? "Unknown";
+                        var channelLanguage = channel.Language ?? "N/A";
+                        var channelBroadcaster = channel.Broadcaster ?? "N/A";
+                        var channelLogo = string.IsNullOrWhiteSpace(channel.Logo) ? "/assets/mock/defaultchannelbg.svg" : channel.Logo;
+                        var playUrl = Url.Action("ChannelPlay", "Player", new { serviceNo = channel.ServiceID}) ?? "#";
+                        <article class="channel-card tv-card tv-focusable" id="@cardId" tabindex="0" data-nav-role="card" data-href="@playUrl">
+                            <div class="channel-thumb" style="background-image:url('@channelLogo')">
+                                <span class="badge live">@(channel.IsSubscribed ? "SUB" : "UNSUB")</span>
+                                <span class="badge quality">@(channel.SignalType ?? "N/A")</span>
+                            </div>
+                            <div class="channel-body compact-body">
+                                <div class="channel-title-row">
+                                    <h3>@channelName</h3>
+                                    <button class="favorite-badge tv-focusable icon-only @(channel.IsSubscribed ? "is-active" : string.Empty)" type="button" data-nav-role="subaction" data-parent-card="#@cardId" data-favorite-toggle data-favorite-state="@(channel.IsSubscribed.ToString().ToLowerInvariant())" data-favorite-label="@channelName" aria-label="Toggle favorite">
+                                        <span class="favorite-heart" aria-hidden="true">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12 21s-7.5-4.73-9.33-7.02C1.12 11.61 2.5 7.5 6 6.5 8 5.9 10 7 12 9c2-2 4-3.1 6-2.5 3.5 1 4.88 5.11 3.33 7.48C19.5 16.27 12 21 12 21z" fill="currentColor" />
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </div>
+                                <p>@(channel.Category ?? category.Category)</p>
+                                <div class="channel-meta compact-meta"><span>@channelLanguage</span><span>@channelBroadcaster</span></div>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+    }
+</section>
