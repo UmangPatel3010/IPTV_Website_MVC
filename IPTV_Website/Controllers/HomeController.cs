@@ -159,10 +159,28 @@ namespace IPTV_Website.Controllers
 
             return Content(content, "application/json");
         }
-        public async Task<IActionResult> ChannelPlay(long serviceNo, string channelURL)
+        public async Task<IActionResult> ChannelPlay(long serviceNo)
         {
             var now = DateTime.Now;
-            var epg = new EpgDataCommonResponse
+
+            var categoryWiseChannelModel = await _apiTvDataService.APPChannels();
+            var flattenedChannels = (categoryWiseChannelModel?.Data ?? new List<CategoryWiseChannel>())
+                .Where(category => !string.Equals(category.Category, "Most Viewed Channels", StringComparison.OrdinalIgnoreCase))
+                .SelectMany(category => category.LanguageChannels ?? new List<LanguageWiseChannel>())
+                .SelectMany(language => language.SubscriberChannels ?? new List<SubscriberChannelsModel>())
+                .ToList();
+
+            var orderedChannels = flattenedChannels
+                .GroupBy(ch => ch.ServiceID)
+                .Select(g => g.First())
+                .OrderBy(ch => ch.ServiceID)
+                .ToList();
+
+            var selectedChannel = orderedChannels.FirstOrDefault(ch => ch.ServiceID == serviceNo);
+            if (selectedChannel == null)
+                return NotFound();
+
+            var fallbackEpg = new EpgDataCommonResponse
             {
                 StatusCode = 200,
                 IsSuccess = true,
@@ -172,7 +190,7 @@ namespace IPTV_Website.Controllers
                     new EpgData
                     {
                         Channel = $"Service {serviceNo}",
-                        DisplayName = "Sample Channel",
+                        DisplayName = selectedChannel.AppDisplayName ?? selectedChannel.ChannelName,
                         LcnNo = serviceNo,
                         BeforeDisplayName = "Previous Show",
                         AfterDisplayName = "Next Show",
@@ -205,23 +223,34 @@ namespace IPTV_Website.Controllers
                 }
             };
 
+            var currentIndex = orderedChannels.FindIndex(channel => channel.ServiceID == serviceNo);
+            var prevServiceNo = currentIndex > 0 ? orderedChannels[currentIndex - 1].ServiceID : orderedChannels.LastOrDefault()?.ServiceID;
+            var nextServiceNo = currentIndex >= 0 && currentIndex < orderedChannels.Count - 1
+                ? orderedChannels[currentIndex + 1].ServiceID
+                : orderedChannels.FirstOrDefault()?.ServiceID;
+
+            var allChannels = orderedChannels
+                .Select(channel => new ChannelListItemDto
+                {
+                    ServiceID = channel.ServiceID,
+                    AppDisplayName = channel.AppDisplayName ?? channel.ChannelName ?? "Unknown",
+                    Category = channel.Category ?? string.Empty
+                })
+                .ToList();
+
+            var epgDataCommonResponse = await _apiTvDataService.EPGGet(serviceNo);
+
             var viewModel = new ChannelPlayViewModel
             {
                 ServiceNo = serviceNo,
-                ChannelUrl = channelURL,
+                ChannelUrl = selectedChannel.ChannelUrl ?? string.Empty,
+                EpgData = epgDataCommonResponse != null && epgDataCommonResponse.StatusCode == 200
+                    ? epgDataCommonResponse.Data
+                    : fallbackEpg.Data,
+                AllChannels = allChannels,
+                PrevServiceNo = prevServiceNo,
+                NextServiceNo = nextServiceNo
             };
-            EpgDataCommonResponse epgDataCommonResponse = await _apiTvDataService.EPGGet(serviceNo);
-
-            if (epgDataCommonResponse != null && epgDataCommonResponse.StatusCode == 200)
-            {
-                viewModel.EpgData = epgDataCommonResponse.Data;
-            }
-            else
-            {
-                viewModel.EpgData = epg.Data;
-
-            }
-
 
             return View(viewModel);
         }
