@@ -27,12 +27,12 @@ namespace IPTV_Website.Controllers
         public async Task<IActionResult> Dashboard()
         {
 
-            //CategoryWiseChannelCommonResponse categoryWiseChannelModel = await _apiTvDataService.APPChannels();
+            CategoryWiseChannelCommonResponse categoryWiseChannelModel = await _apiTvDataService.APPChannels();
 
-            //if (categoryWiseChannelModel != null && categoryWiseChannelModel.StatusCode == 200)
-            //{
-            //    return View(categoryWiseChannelModel.Data);
-            //}
+            if (categoryWiseChannelModel != null && categoryWiseChannelModel.StatusCode == 200)
+            {
+                return View(categoryWiseChannelModel.Data);
+            }
 
             return RedirectToAction("Dashboard_copy");
         }
