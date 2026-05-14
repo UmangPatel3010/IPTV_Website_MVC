@@ -84,7 +84,7 @@
                         var channelLanguage = channel.Language ?? "N/A";
                         var channelBroadcaster = channel.Broadcaster ?? "N/A";
                         var channelLogo = string.IsNullOrWhiteSpace(channel.Logo) ? "/assets/mock/defaultchannelbg.svg" : channel.Logo;
-                        var playUrl = Url.Action("ChannelPlay", "Home", new { serviceNo = channel.ServiceID, channelURL = channel.ChannelUrl }) ?? "#";
+                        var playUrl = Url.Action("ChannelPlay", "Home", new { serviceNo = channel.ServiceID}) ?? "#";
                         <article class="channel-card tv-card tv-focusable" id="@cardId" tabindex="0" data-nav-role="card" data-href="@playUrl">
                             <div class="channel-thumb" style="background-image:url('@channelLogo')">
                                 <span class="badge live">@(channel.IsSubscribed ? "SUB" : "UNSUB")</span>
